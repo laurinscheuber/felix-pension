@@ -1,0 +1,199 @@
+body {
+    /* Subtle animated gradient background */
+    background: linear-gradient(135deg, #f6d365 0%, #fda085 50%, #f6d365 100%);
+    background-size: 200% 200%;
+    animation: gradientShift 15s ease infinite;
+    font-family: 'Roboto', sans-serif; /* Changed font */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    color: #333;
+    overflow: hidden; /* Hide scrollbars during potential animations */
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.container {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 40px 60px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 600px;
+    position: relative; /* For positioning hidden elements */
+    animation: fadeIn 1s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+h1 {
+    font-family: 'Lobster', cursive;
+    color: #ff6347; /* Tomato */
+    font-size: 3.5em;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    /* Keep wiggle on hover */
+}
+
+.subtitle {
+    font-size: 1.2em;
+    color: #555;
+    margin-bottom: 30px;
+    animation: slideInFromLeft 1.2s ease-out;
+}
+
+@keyframes slideInFromLeft {
+    from { opacity: 0; transform: translateX(-50px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+#timer-container { /* Style the new container if needed, maybe just for layout */
+    margin-bottom: 20px;
+    animation: slideInFromRight 1.2s ease-out;
+}
+
+#timer {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    /* animation removed from here, moved to container */
+}
+
+@keyframes slideInFromRight {
+    from { opacity: 0; transform: translateX(50px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+#timer div {
+    background-color: #ff6347;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    min-width: 80px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+}
+
+#timer div:hover {
+    transform: translateY(-5px); /* Lift effect on hover */
+}
+
+#timer span {
+    display: block;
+    font-size: 2.5em;
+    font-weight: bold;
+    /* Add a subtle pop effect when numbers change? (Handled in JS potentially or harder with CSS) */
+}
+
+.until {
+    font-size: 0.9em;
+    color: #777;
+    margin-bottom: 40px;
+    animation: fadeIn 1.5s ease-out 0.5s; /* Fade in slightly later */
+    animation-fill-mode: backwards; /* Start invisible before animation */
+}
+
+/* Hidden Button / Easter Egg Trigger */
+.escape-hatch {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 15px;
+    height: 15px;
+    background-color: #fda085; /* Blend with background */
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+}
+
+.escape-hatch:hover {
+    transform: scale(1.5);
+    background-color: #ff6347;
+}
+
+/* Retirement Visualization */
+#retirement-visual {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #e0f7fa; /* Light cyan */
+    border-radius: 10px;
+    border: 2px dashed #80deea; /* Cyan border */
+    animation: popIn 0.5s ease-out;
+}
+
+@keyframes popIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+#retirement-visual h2 {
+    color: #00796b; /* Teal */
+    font-family: 'Lobster', cursive;
+    font-size: 2em;
+}
+
+#retirement-gif {
+    max-width: 80%;
+    height: auto;
+    border-radius: 5px;
+    margin-top: 15px;
+    margin-bottom: 20px;
+}
+
+#back-to-reality {
+    padding: 10px 20px;
+    font-size: 1em;
+    font-weight: bold;
+    color: white;
+    background-color: #ff6347;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s ease;
+}
+
+#back-to-reality:hover {
+    background-color: #e5533d;
+    transform: scale(1.05);
+}
+
+/* Simple Footer Easter Egg */
+.footer-egg {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    font-size: 0.8em;
+    color: #aaa;
+    cursor: help;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.footer-egg:hover {
+    transform: rotate(360deg) scale(1.5);
+    color: #ff6347;
+}
+
+
+/* Utility Class */
+.hidden {
+    display: none;
+}
+
+/* Basic Animation Easter Egg Example */
+@keyframes wiggle {
+    0%, 100% { transform: rotate(-3deg); }
+    50% { transform: rotate(3deg); }
+}
+
+h1:hover {
+    animation: wiggle 0.5s ease-in-out infinite;
+}
