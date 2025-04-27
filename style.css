@@ -1,18 +1,79 @@
 body {
-    /* Subtle animated gradient background */
-    background: linear-gradient(135deg, #f6d365 0%, #fda085 50%, #f6d365 100%);
-    background-size: 200% 200%;
-    animation: gradientShift 15s ease infinite;
-    font-family: 'Roboto', sans-serif; /* Changed font */
+    /* Dark space background */
+    background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+    /* background: linear-gradient(135deg, #f6d365 0%, #fda085 50%, #f6d365 100%); */ /* Original gradient commented out */
+    /* background-size: 200% 200%; */ /* Not needed for radial */
+    /* animation: gradientShift 15s ease infinite; */ /* Animation removed */
+    font-family: 'Roboto', sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
     margin: 0;
-    color: #333;
-    overflow: hidden; /* Hide scrollbars during potential animations */
+    color: #eee; /* Lighter text color for dark background */
+    overflow: hidden;
+    position: relative; /* Needed for star pseudo-elements */
+    transition: background 1s ease-in-out; /* Smooth transition for background change */
 }
 
+/* Add stars using pseudo-elements */
+body::before, body::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px; /* Small size for stars */
+    height: 1px; /* Small size for stars */
+    background: transparent;
+    box-shadow: /* Multiple shadows create the starfield */
+        /* Adjust numbers and positions for desired density/look */
+        -150px 300px #FFF, 200px 150px #FFF, -50px -200px #FFF,
+        300px -100px #FFF, 100px 400px #FFF, -400px 50px #FFF,
+        50px -350px #FFF, 450px 250px #FFF, -300px -150px #FFF,
+        /* Add more stars */
+        500px 50px #FFF, -250px 350px #FFF, 150px -450px #FFF,
+        -450px -50px #FFF, 350px 450px #FFF, -100px 100px #FFF,
+        400px -300px #FFF, -350px 200px #FFF, 250px -250px #FFF;
+    /* Add animation for twinkling effect */
+    animation: twinkle 5s infinite alternate ease-in-out;
+    z-index: -1; /* Place behind content */
+}
+
+/* Second layer of stars with different timing/position */
+body::after {
+    box-shadow:
+        -100px 250px #FFF, 250px 100px #FFF, -150px -250px #FFF,
+        350px -150px #FFF, 50px 350px #FFF, -350px 100px #FFF,
+        100px -400px #FFF, 400px 200px #FFF, -200px -100px #FFF,
+        /* Add more stars */
+        550px 150px #FFF, -300px 400px #FFF, 200px -500px #FFF,
+        -500px -100px #FFF, 400px 500px #FFF, -50px 150px #FFF,
+        450px -350px #FFF, -400px 250px #FFF, 300px -300px #FFF;
+    animation-delay: 2.5s; /* Offset animation */
+}
+
+
+@keyframes twinkle {
+    0% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+
+/* Sunny mode activated when countdown finishes */
+body.sunny-mode {
+    background: linear-gradient(135deg, #f6d365 0%, #fda085 50%, #f6d365 100%);
+    background-size: 200% 200%;
+    animation: gradientShift 15s ease infinite;
+    color: #333; /* Darker text for light background */
+}
+
+/* Hide stars in sunny mode */
+body.sunny-mode::before, body.sunny-mode::after {
+    display: none;
+}
+
+
+/* @keyframes gradientShift { ... } */ /* Keep this animation */
 @keyframes gradientShift {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
@@ -20,37 +81,52 @@ body {
 }
 
 .container {
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(0, 0, 0, 0.6); /* Darker semi-transparent background */
     padding: 40px 60px;
     border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1); /* Lighter shadow on dark bg */
     text-align: center;
     max-width: 600px;
     position: relative; /* For positioning hidden elements */
     animation: fadeIn 1s ease-out;
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
 }
 
+/* Ensure sunny mode container looks good too */
+body.sunny-mode .container {
+    background-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: none;
+}
+
+
+/* @keyframes fadeIn { ... } */ /* Keep this animation */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-20px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
 h1 {
-    font-family: 'Lobster', cursive;
-    color: #ff6347; /* Tomato */
+    font-family: 'Lobster', cursive; /* Ensure Lobster font is applied */
+    color: #ff6347; /* Tomato color */
     font-size: 3.5em;
     margin-bottom: 10px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.4); /* Slightly stronger shadow */
     /* Keep wiggle on hover */
 }
 
 .subtitle {
     font-size: 1.2em;
-    color: #555;
+    color: #ccc; /* Lighter subtitle color */
     margin-bottom: 30px;
     animation: slideInFromLeft 1.2s ease-out;
 }
 
+body.sunny-mode .subtitle {
+    color: #555; /* Restore original color in sunny mode */
+}
+
+/* @keyframes slideInFromLeft { ... } */ /* Keep this animation */
 @keyframes slideInFromLeft {
     from { opacity: 0; transform: translateX(-50px); }
     to { opacity: 1; transform: translateX(0); }
@@ -68,24 +144,39 @@ h1 {
     /* animation removed from here, moved to container */
 }
 
+/* @keyframes slideInFromRight { ... } */ /* Keep this animation */
 @keyframes slideInFromRight {
     from { opacity: 0; transform: translateX(50px); }
     to { opacity: 1; transform: translateX(0); }
 }
 
 #timer div {
-    background-color: #ff6347;
+    background-color: rgba(255, 99, 71, 0.8); /* Slightly transparent Tomato */
     color: white;
     padding: 15px 20px;
     border-radius: 8px;
     min-width: 80px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Adjusted shadow */
+    transition: transform 0.2s ease, background-color 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Subtle border */
 }
+
+body.sunny-mode #timer div {
+    background-color: #ff6347; /* Solid color in sunny mode */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border: none;
+}
+
 
 #timer div:hover {
     transform: translateY(-5px); /* Lift effect on hover */
+    background-color: rgba(255, 99, 71, 1); /* Solid on hover */
 }
+
+body.sunny-mode #timer div:hover {
+     background-color: #e5533d; /* Darker shade on hover in sunny mode */
+}
+
 
 #timer span {
     display: block;
@@ -96,11 +187,16 @@ h1 {
 
 .until {
     font-size: 0.9em;
-    color: #777;
+    color: #aaa; /* Lighter color */
     margin-bottom: 40px;
     animation: fadeIn 1.5s ease-out 0.5s; /* Fade in slightly later */
     animation-fill-mode: backwards; /* Start invisible before animation */
 }
+
+body.sunny-mode .until {
+    color: #777; /* Restore original color */
+}
+
 
 /* Hidden Button / Easter Egg Trigger */
 .escape-hatch {
@@ -109,36 +205,48 @@ h1 {
     right: 10px;
     width: 15px;
     height: 15px;
-    background-color: #fda085; /* Blend with background */
+    background-color: rgba(255, 99, 71, 0.5); /* Semi-transparent */
     border-radius: 50%;
     cursor: pointer;
-    transition: transform 0.2s ease-in-out;
+    transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+    border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .escape-hatch:hover {
     transform: scale(1.5);
-    background-color: #ff6347;
+    background-color: #ff6347; /* Solid on hover */
 }
 
 /* Retirement Visualization */
 #retirement-visual {
     margin-top: 30px;
     padding: 20px;
-    background-color: #e0f7fa; /* Light cyan */
+    background-color: rgba(0, 121, 107, 0.7); /* Darker Teal, semi-transparent */
     border-radius: 10px;
-    border: 2px dashed #80deea; /* Cyan border */
+    border: 2px dashed rgba(128, 222, 234, 0.7); /* Cyan border, semi-transparent */
     animation: popIn 0.5s ease-out;
 }
 
+body.sunny-mode #retirement-visual {
+    background-color: #e0f7fa; /* Light cyan */
+    border: 2px dashed #80deea; /* Cyan border */
+}
+
+
+/* @keyframes popIn { ... } */ /* Keep this animation */
 @keyframes popIn {
     from { opacity: 0; transform: scale(0.8); }
     to { opacity: 1; transform: scale(1); }
 }
 
 #retirement-visual h2 {
-    color: #00796b; /* Teal */
+    color: #b2dfdb; /* Lighter Teal */
     font-family: 'Lobster', cursive;
     font-size: 2em;
+}
+
+body.sunny-mode #retirement-visual h2 {
+     color: #00796b; /* Original Teal */
 }
 
 #retirement-gif {
@@ -172,10 +280,15 @@ h1 {
     bottom: 5px;
     left: 5px;
     font-size: 0.8em;
-    color: #aaa;
+    color: #777; /* Darker grey for contrast */
     cursor: help;
     transition: transform 0.3s ease, color 0.3s ease;
 }
+
+body.sunny-mode .footer-egg {
+    color: #aaa; /* Lighter grey in sunny mode */
+}
+
 
 .footer-egg:hover {
     transform: rotate(360deg) scale(1.5);

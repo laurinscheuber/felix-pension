@@ -18,24 +18,34 @@ const retirementDate = new Date('2025-09-01T00:00:00').getTime();
 let intervalId;
 let timeMultiplier = 1; // 1 for normal speed
 let startTime = new Date().getTime(); // Store the initial start time
+let speedupStartTime = 0; // Track when speedup began
+let speedupReferenceTime = 0; // Track the 'real' time just before speedup
 let isFinished = false; // Track if countdown finished
 
 function updateCountdown() {
     const now = new Date().getTime();
-    const elapsedRealTime = (timeMultiplier > 1) ? (now - speedupStartTime) : 0;
-    // Use the initial start time for normal speed calculation
-    const effectiveNow = (timeMultiplier > 1) ? speedupReferenceTime + elapsedRealTime * timeMultiplier : startTime + (now - startTime);
+    let effectiveNow;
+
+    if (timeMultiplier > 1) {
+        // Calculate elapsed time since speedup started
+        const elapsedSinceSpeedup = now - speedupStartTime;
+        // Calculate the effective time jump
+        effectiveNow = speedupReferenceTime + (elapsedSinceSpeedup * timeMultiplier);
+    } else {
+        // Normal speed calculation based on initial page load time
+        effectiveNow = startTime + (now - startTime);
+    }
 
     const distance = retirementDate - effectiveNow;
 
     if (distance <= 0 && !isFinished) {
         isFinished = true;
-        clearInterval(intervalId); // Stop the interval
-        timerContainerEl.innerHTML = "<h1>FREIHEIT!</h1>"; // German Freedom!
+        clearInterval(intervalId);
+        timerContainerEl.innerHTML = "<h1>FREIHEIT!</h1>";
         escapeHatch.style.display = 'none';
         retirementVisual.classList.remove('hidden');
+        document.body.classList.add('sunny-mode'); // Activate sunny theme
         // Keep the back to reality button visible
-        // backToRealityBtn.style.display = 'none'; // REMOVED
         return;
     }
 
@@ -71,9 +81,6 @@ function updateCountdown() {
 }
 
 // Variables to manage speedup timing correctly
-let speedupStartTime = 0;
-let speedupReferenceTime = 0;
-
 function startTimer(speed = 1000) {
     clearInterval(intervalId); // Clear any existing interval
     isFinished = false; // Reset finished state
@@ -88,56 +95,44 @@ startTimer(1000);
 // --- Event Listeners ---
 
 escapeHatch.addEventListener('click', () => {
-    console.log('Escape hatch clicked!');
-    timeMultiplier = 86400; // Approx 1 day per second (24*60*60)
+    console.log('Escape hatch clicked! Speeding up.');
+    timeMultiplier = 3600; // Speed up: 1 hour per second (3600 seconds/hour)
     speedupStartTime = new Date().getTime(); // Record when speedup starts
-    // Calculate the 'time' the counter showed just before speedup
-    const elapsedSinceStart = speedupStartTime - startTime;
-    speedupReferenceTime = startTime + elapsedSinceStart; // Use the correct reference
+
+    // Calculate the 'real' time elapsed just before speedup
+    const elapsedRealTimeBeforeSpeedup = speedupStartTime - startTime;
+    speedupReferenceTime = startTime + elapsedRealTimeBeforeSpeedup;
 
     clearInterval(intervalId); // Clear existing interval
-    intervalId = setInterval(updateCountdown, 50); // Start faster interval for visual spin
+    intervalId = setInterval(updateCountdown, 50); // Update faster for visual effect
 
+    // Show retirement visual immediately on click, even if not finished
     retirementVisual.classList.remove('hidden');
-    escapeHatch.style.display = 'none'; // Hide the trigger
+    // Optionally hide the hatch itself after clicking
+    // escapeHatch.style.display = 'none';
 });
 
 backToRealityBtn.addEventListener('click', () => {
     console.log('Back to reality clicked!');
-    timeMultiplier = 1; // Back to normal speed
+    timeMultiplier = 1; // Reset speed
+    clearInterval(intervalId);
 
-    // Reset timer display if it showed "FREIHEIT!"
-    if (isFinished) {
-        timerContainerEl.innerHTML = originalTimerHTML;
-    }
-
-    clearInterval(intervalId); // Clear faster interval
-    startTimer(1000); // Restart normal interval
-
+    // Reset the timer display to its original state
+    timerContainerEl.innerHTML = originalTimerHTML;
     retirementVisual.classList.add('hidden');
-    escapeHatch.style.display = 'block'; // Show the trigger again
+    document.body.classList.remove('sunny-mode'); // Remove sunny mode if active
+    escapeHatch.style.display = 'block'; // Show the hatch again
+
+    // Restart the timer at normal speed
+    startTimer(1000);
 });
 
-// --- Easter Egg Example ---
-const footerEgg = document.querySelector('.footer-egg');
-footerEgg.addEventListener('mouseover', () => {
-    // Could add a temporary message or another small animation
-    console.log('Footer egg hovered!');
+// Ensure the GIF reloads if the user goes back and forth
+retirementVisual.addEventListener('transitionend', (event) => {
+    if (event.propertyName === 'opacity' && !retirementVisual.classList.contains('hidden')) {
+        // Reload GIF when shown (optional, might cause flicker)
+        // const currentSrc = retirementGif.src;
+        // retirementGif.src = ''; // Clear src briefly
+        // retirementGif.src = currentSrc; // Set it back to trigger reload
+    }
 });
-
-// Add CSS class for timer pop animation (needs corresponding CSS)
-const styleSheet = document.styleSheets[0];
-try {
-    styleSheet.insertRule(`
-        @keyframes timerPop {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-    `, styleSheet.cssRules.length);
-    styleSheet.insertRule(`
-        .pop { animation: timerPop 0.2s ease-in-out; }
-    `, styleSheet.cssRules.length);
-} catch (e) {
-    console.error("Could not insert CSS rules for timer pop animation:", e);
-}
