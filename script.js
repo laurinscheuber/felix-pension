@@ -1,138 +1,276 @@
-const daysEl = document.getElementById('days');
-const hoursEl = document.getElementById('hours');
-const minutesEl = document.getElementById('minutes');
-const secondsEl = document.getElementById('seconds');
-const timerContainerEl = document.getElementById('timer-container'); // Get the container
-const timerEl = document.getElementById('timer'); // Keep reference if needed, maybe not
-const escapeHatch = document.querySelector('.escape-hatch');
-const retirementVisual = document.getElementById('retirement-visual');
-const backToRealityBtn = document.getElementById('back-to-reality');
-const retirementGif = document.getElementById('retirement-gif');
+// Set the actual retirement date
+const actualRetirementDate = new Date("September 1, 2025 00:00:00").getTime();
+let countdownDate = actualRetirementDate; // Start with the real date
 
-// Store the original timer HTML structure for resetting
-const originalTimerHTML = timerContainerEl.innerHTML;
+let speed = 1; // Normal speed
+let isHyperspeed = false;
+let countdownInterval;
+let lastUpdate = new Date().getTime();
 
-// Set the target date: September 1st, 2025 00:00:00
-const retirementDate = new Date('2025-09-01T00:00:00').getTime();
+// DOM Elements
+const space = document.getElementById('space');
+const hyperspace = document.getElementById('hyperspace');
+const countdownContainer = document.getElementById('countdown-container');
+const countdownDisplay = document.getElementById('countdown');
+const titleDisplay = document.getElementById('title');
+const ufo = document.getElementById('ufo');
+const easterEggs = document.querySelectorAll('.easter-egg');
+const beachScene = document.getElementById('beach-scene');
+const backButton = document.getElementById('back-button');
+const hyperspeedEgg = document.getElementById('hyperspeed-egg');
 
-let intervalId;
-let timeMultiplier = 1; // 1 for normal speed
-let startTime = new Date().getTime(); // Store the initial start time
-let speedupStartTime = 0; // Track when speedup began
-let speedupReferenceTime = 0; // Track the 'real' time just before speedup
-let isFinished = false; // Track if countdown finished
+// Create stars
+function createStars() {
+    space.innerHTML = ''; // Clear existing stars if any
+    for (let i = 0; i < 200; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.width = Math.random() * 3 + 'px';
+        star.style.height = star.style.width;
+        star.style.top = Math.random() * 100 + '%';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.animationDelay = Math.random() * 5 + 's';
+        space.appendChild(star);
+    }
+}
 
+// Create planets
+function createPlanets() {
+    const colors = ['#ff4500', '#00bfff', '#32cd32', '#ff69b4', '#ffd700'];
+    // Remove existing planets before creating new ones
+    document.querySelectorAll('.planet').forEach(p => p.remove());
+    for (let i = 0; i < 5; i++) {
+        const planet = document.createElement('div');
+        planet.className = 'planet';
+        const size = Math.random() * 40 + 20;
+        planet.style.width = size + 'px';
+        planet.style.height = size + 'px';
+        planet.style.backgroundColor = colors[i];
+        planet.style.top = Math.random() * 80 + 10 + '%';
+        planet.style.left = Math.random() * 80 + 10 + '%';
+        // Adjust animation based on size for parallax effect
+        planet.style.animationDuration = (size / 20) * 120 + 's'; 
+        planet.style.animationDelay = Math.random() * -120 + 's'; // Random start point
+        space.appendChild(planet);
+    }
+}
+
+// Create hyperspace stars
+function createHyperspaceEffect() {
+    hyperspace.innerHTML = '';
+    for (let i = 0; i < 300; i++) {
+        const star = document.createElement('div');
+        star.className = 'hyperspeed-star';
+        hyperspace.appendChild(star);
+    }
+}
+
+// Function to animate hyperspace stars (using Web Animations API)
+function animateHyperspaceStars() {
+    const stars = hyperspace.querySelectorAll('.hyperspeed-star');
+    stars.forEach(star => {
+        animateSingleHyperspaceStar(star);
+    });
+}
+
+function animateSingleHyperspaceStar(star) {
+    if (!isHyperspeed) return; // Stop animation if not in hyperspeed
+
+    const duration = (1 + Math.random() * 1.5) * 1000; // 1s to 2.5s duration
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 50 + Math.random() * 50; // Fly out 50-100% viewport distance
+    const endX = 50 + Math.cos(angle) * distance;
+    const endY = 50 + Math.sin(angle) * distance;
+
+    star.animate([
+        { transform: 'translate(-50%, -50%) scale(0.1)', opacity: 0, offset: 0 },
+        { opacity: 1, offset: 0.1 }, // Quickly fade in
+        { transform: `translate(-50%, -50%) translate(${Math.cos(angle) * 50}px, ${Math.sin(angle) * 50}px) scale(1)`, opacity: 1, offset: 0.2 }, // Move slightly out
+        { transform: `translate(-50%, -50%) translate(${Math.cos(angle) * window.innerWidth}px, ${Math.sin(angle) * window.innerHeight}px) scale(5)`, opacity: 0, offset: 1 } // Fly way out
+    ], {
+        duration: duration,
+        easing: 'linear',
+        fill: 'forwards'
+    }).onfinish = () => {
+        // Restart the animation for this star immediately if still in hyperspeed
+        if (isHyperspeed) {
+            animateSingleHyperspaceStar(star);
+        }
+    };
+}
+
+// Initialize countdown
 function updateCountdown() {
     const now = new Date().getTime();
-    let effectiveNow;
+    let difference = countdownDate - now;
 
-    if (timeMultiplier > 1) {
-        // Calculate elapsed time since speedup started
-        const elapsedSinceSpeedup = now - speedupStartTime;
-        // Calculate the effective time jump
-        effectiveNow = speedupReferenceTime + (elapsedSinceSpeedup * timeMultiplier);
-    } else {
-        // Normal speed calculation based on initial page load time
-        effectiveNow = startTime + (now - startTime);
+    // If in hyperspeed mode, adjust the difference based on elapsed time and speed
+    if (isHyperspeed) {
+        const elapsed = now - lastUpdate;
+        difference -= elapsed * (speed - 1);
+        // Ensure countdown doesn't go negative artificially fast
+        if (difference < 0) difference = 0; 
     }
 
-    const distance = retirementDate - effectiveNow;
+    lastUpdate = now; // Update lastUpdate time for the next calculation
 
-    if (distance <= 0 && !isFinished) {
-        isFinished = true;
-        clearInterval(intervalId);
-        timerContainerEl.innerHTML = "<h1>FREIHEIT!</h1>";
-        escapeHatch.style.display = 'none';
-        retirementVisual.classList.remove('hidden');
-        document.body.classList.add('sunny-mode'); // Activate sunny theme
-        // Keep the back to reality button visible
+    // If countdown finished
+    if (difference <= 0) {
+        clearInterval(countdownInterval);
+        countdownDisplay.innerHTML = "0d 0h 0m 0s"; // Show zero
+        showBeachScene();
         return;
     }
 
-    // If already finished, don't update numbers
-    if (isFinished) return;
+    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
-    // Ensure elements exist before updating (needed after reset)
-    const currentDaysEl = document.getElementById('days');
-    const currentHoursEl = document.getElementById('hours');
-    const currentMinutesEl = document.getElementById('minutes');
-    const currentSecondsEl = document.getElementById('seconds');
-
-    if (!currentDaysEl || !currentHoursEl || !currentMinutesEl || !currentSecondsEl) {
-        console.error("Timer elements not found after potential reset.");
-        return; // Stop if elements are missing
-    }
-
-    const days = Math.max(0, Math.floor(distance / (1000 * 60 * 60 * 24)));
-    const hours = Math.max(0, Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
-    const minutes = Math.max(0, Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)));
-    const seconds = Math.max(0, Math.floor((distance % (1000 * 60)) / 1000));
-
-    // Add slight animation class briefly when numbers change (optional)
-    if (currentSecondsEl.textContent !== String(seconds).padStart(2, '0')) {
-        currentSecondsEl.parentNode.classList.add('pop');
-        setTimeout(() => currentSecondsEl.parentNode.classList.remove('pop'), 100);
-    }
-
-    currentDaysEl.textContent = String(days).padStart(2, '0');
-    currentHoursEl.textContent = String(hours).padStart(2, '0');
-    currentMinutesEl.textContent = String(minutes).padStart(2, '0');
-    currentSecondsEl.textContent = String(seconds).padStart(2, '0');
+    countdownDisplay.innerHTML =
+        days + "d " + hours + "h " + minutes + "m " + seconds + "s";
 }
 
-// Variables to manage speedup timing correctly
-function startTimer(speed = 1000) {
-    clearInterval(intervalId); // Clear any existing interval
-    isFinished = false; // Reset finished state
-    startTime = new Date().getTime(); // Reset start time for normal speed calculation
-    intervalId = setInterval(updateCountdown, speed);
-    updateCountdown(); // Initial call
+function showBeachScene() {
+    space.style.display = 'none';
+    hyperspace.style.display = 'none';
+    countdownContainer.style.display = 'none';
+    ufo.style.display = 'none';
+    easterEggs.forEach(egg => egg.style.display = 'none');
+    beachScene.style.display = 'block';
+    isHyperspeed = false; // Ensure hyperspeed is off
+    hyperspace.style.opacity = '0';
+    space.style.filter = 'none';
 }
 
-// Start the countdown immediately at normal speed
-startTimer(1000);
+function showSpaceScene() {
+    beachScene.style.display = 'none';
+    space.style.display = 'block';
+    countdownContainer.style.display = 'block';
+    ufo.style.display = 'block';
+    ufo.style.animation = 'flyby 20s linear infinite'; // Restart UFO animation
+    easterEggs.forEach(egg => egg.style.display = 'block');
 
-// --- Event Listeners ---
+    // Reset countdown to actual retirement date
+    countdownDate = actualRetirementDate;
+    lastUpdate = new Date().getTime();
 
-escapeHatch.addEventListener('click', () => {
-    console.log('Escape hatch clicked! Speeding up.');
-    timeMultiplier = 3600; // Speed up: 1 hour per second (3600 seconds/hour)
-    speedupStartTime = new Date().getTime(); // Record when speedup starts
+    // Restart countdown
+    clearInterval(countdownInterval);
+    countdownInterval = setInterval(updateCountdown, 1000);
+    updateCountdown(); // Initial call to display immediately
+}
 
-    // Calculate the 'real' time elapsed just before speedup
-    const elapsedRealTimeBeforeSpeedup = speedupStartTime - startTime;
-    speedupReferenceTime = startTime + elapsedRealTimeBeforeSpeedup;
+// Handle Easter Eggs
+function setupEasterEggs() {
+    // Egg 1: Hue Rotate
+    document.getElementById('egg1').addEventListener('click', () => {
+        space.style.filter = 'hue-rotate(90deg)';
+        setTimeout(() => {
+            space.style.filter = 'none';
+        }, 3000);
+    });
 
-    clearInterval(intervalId); // Clear existing interval
-    intervalId = setInterval(updateCountdown, 50); // Update faster for visual effect
+    // Egg 2: Rotate Countdown
+    document.getElementById('egg2').addEventListener('click', () => {
+        countdownDisplay.style.transition = 'transform 0.5s'; // Add transition for smoothness
+        countdownDisplay.style.transform = 'rotate(180deg)';
+        setTimeout(() => {
+            countdownDisplay.style.transform = 'none';
+        }, 3000);
+    });
 
-    // Show retirement visual immediately on click, even if not finished
-    retirementVisual.classList.remove('hidden');
-    // Optionally hide the hatch itself after clicking
-    // escapeHatch.style.display = 'none';
-});
+    // Egg 3: Twinkle Stars (Visual Feedback)
+    document.getElementById('egg3').addEventListener('click', () => {
+        const originalColors = [];
+        const stars = space.querySelectorAll('.star');
+        stars.forEach(star => {
+            originalColors.push(star.style.backgroundColor);
+            star.style.backgroundColor = '#ff00ff'; // Magenta twinkle
+        });
+        setTimeout(() => {
+            stars.forEach((star, index) => {
+                star.style.backgroundColor = originalColors[index] || 'white';
+            });
+        }, 2000);
+    });
 
-backToRealityBtn.addEventListener('click', () => {
-    console.log('Back to reality clicked!');
-    timeMultiplier = 1; // Reset speed
-    clearInterval(intervalId);
+    // Egg 4: Change Title
+    document.getElementById('egg4').addEventListener('click', () => {
+        const originalTitle = titleDisplay.textContent;
+        titleDisplay.textContent = "Endlich frei von Felix! 🎉";
+        setTimeout(() => {
+            titleDisplay.textContent = originalTitle;
+        }, 3000);
+    });
 
-    // Reset the timer display to its original state
-    timerContainerEl.innerHTML = originalTimerHTML;
-    retirementVisual.classList.add('hidden');
-    document.body.classList.remove('sunny-mode'); // Remove sunny mode if active
-    escapeHatch.style.display = 'block'; // Show the hatch again
+    // UFO Easter Egg: Abduct
+    ufo.addEventListener('click', () => {
+        ufo.style.animation = 'none'; // Stop flying
+        ufo.style.transition = 'all 0.5s ease-in-out';
+        ufo.style.top = '50%';
+        ufo.style.left = '50%';
+        ufo.style.transform = 'translate(-50%, -50%) scale(3)';
+        ufo.style.backgroundColor = '#00ff00'; // Green abduction beam color
 
-    // Restart the timer at normal speed
-    startTimer(1000);
-});
+        setTimeout(() => {
+            ufo.style.transition = 'none'; // Remove transition for instant reset
+            ufo.style.top = '100px';
+            ufo.style.left = '-100px';
+            ufo.style.transform = 'none';
+            ufo.style.backgroundColor = '#c0c0c0';
+            // Use requestAnimationFrame to ensure reset happens before restarting animation
+            requestAnimationFrame(() => {
+                ufo.style.animation = 'flyby 20s linear infinite';
+            });
+        }, 2000);
+    });
 
-// Ensure the GIF reloads if the user goes back and forth
-retirementVisual.addEventListener('transitionend', (event) => {
-    if (event.propertyName === 'opacity' && !retirementVisual.classList.contains('hidden')) {
-        // Reload GIF when shown (optional, might cause flicker)
-        // const currentSrc = retirementGif.src;
-        // retirementGif.src = ''; // Clear src briefly
-        // retirementGif.src = currentSrc; // Set it back to trigger reload
-    }
+    // Hyperspeed Easter Egg
+    hyperspeedEgg.addEventListener('click', () => {
+        if (!isHyperspeed) {
+            isHyperspeed = true;
+            speed = 1000; // Set hyperspeed factor
+            hyperspace.style.opacity = '1';
+            space.style.filter = 'blur(3px)';
+            createHyperspaceEffect(); // Recreate stars for animation
+            animateHyperspaceStars(); // Start the animation
+
+            // Update countdown faster
+            clearInterval(countdownInterval);
+            countdownInterval = setInterval(updateCountdown, 10); // Update every 10ms
+            lastUpdate = new Date().getTime(); // Reset lastUpdate for accurate fast counting
+
+            // Set a timeout to automatically disable hyperspeed
+            setTimeout(() => {
+                if (isHyperspeed) { // Only disable if still active
+                    isHyperspeed = false;
+                    speed = 1;
+                    hyperspace.style.opacity = '0';
+                    space.style.filter = 'none';
+
+                    // Reset countdown interval to normal speed
+                    clearInterval(countdownInterval);
+                    countdownInterval = setInterval(updateCountdown, 1000);
+                    lastUpdate = new Date().getTime(); // Reset lastUpdate
+                }
+            }, 7000); // Hyperspeed duration (7 seconds)
+        }
+    });
+
+    // Back to Reality Button
+    backButton.addEventListener('click', showSpaceScene);
+}
+
+// Initialize everything on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+    createStars();
+    createPlanets();
+    createHyperspaceEffect(); // Prepare hyperspace visuals
+    setupEasterEggs();
+
+    // Initial countdown update and start interval
+    lastUpdate = new Date().getTime();
+    updateCountdown(); // Initial call to display time immediately
+    countdownInterval = setInterval(updateCountdown, 1000);
 });

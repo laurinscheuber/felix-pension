@@ -1,312 +1,441 @@
-body {
-    /* Dark space background */
-    background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
-    /* background: linear-gradient(135deg, #f6d365 0%, #fda085 50%, #f6d365 100%); */ /* Original gradient commented out */
-    /* background-size: 200% 200%; */ /* Not needed for radial */
-    /* animation: gradientShift 15s ease infinite; */ /* Animation removed */
-    font-family: 'Roboto', sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+body, html {
     margin: 0;
-    color: #eee; /* Lighter text color for dark background */
+    padding: 0;
+    height: 100%;
     overflow: hidden;
-    position: relative; /* Needed for star pseudo-elements */
-    transition: background 1s ease-in-out; /* Smooth transition for background change */
+    font-family: 'Arial', sans-serif;
+    color: white;
 }
 
-/* Add stars using pseudo-elements */
-body::before, body::after {
-    content: "";
-    position: absolute;
+/* Space Background */
+#space {
+    position: fixed;
     top: 0;
     left: 0;
-    width: 1px; /* Small size for stars */
-    height: 1px; /* Small size for stars */
-    background: transparent;
-    box-shadow: /* Multiple shadows create the starfield */
-        /* Adjust numbers and positions for desired density/look */
-        -150px 300px #FFF, 200px 150px #FFF, -50px -200px #FFF,
-        300px -100px #FFF, 100px 400px #FFF, -400px 50px #FFF,
-        50px -350px #FFF, 450px 250px #FFF, -300px -150px #FFF,
-        /* Add more stars */
-        500px 50px #FFF, -250px 350px #FFF, 150px -450px #FFF,
-        -450px -50px #FFF, 350px 450px #FFF, -100px 100px #FFF,
-        400px -300px #FFF, -350px 200px #FFF, 250px -250px #FFF;
-    /* Add animation for twinkling effect */
-    animation: twinkle 5s infinite alternate ease-in-out;
-    z-index: -1; /* Place behind content */
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, #00008B 0%, #000000 70%);
+    transition: filter 0.5s;
+    z-index: -2;
 }
 
-/* Second layer of stars with different timing/position */
-body::after {
-    box-shadow:
-        -100px 250px #FFF, 250px 100px #FFF, -150px -250px #FFF,
-        350px -150px #FFF, 50px 350px #FFF, -350px 100px #FFF,
-        100px -400px #FFF, 400px 200px #FFF, -200px -100px #FFF,
-        /* Add more stars */
-        550px 150px #FFF, -300px 400px #FFF, 200px -500px #FFF,
-        -500px -100px #FFF, 400px 500px #FFF, -50px 150px #FFF,
-        450px -350px #FFF, -400px 250px #FFF, 300px -300px #FFF;
-    animation-delay: 2.5s; /* Offset animation */
+/* Stars */
+.star {
+    position: absolute;
+    background-color: white;
+    border-radius: 50%;
+    animation: twinkle 5s infinite alternate;
 }
-
 
 @keyframes twinkle {
-    0% { opacity: 0.5; }
-    100% { opacity: 1; }
+    0% { opacity: 0.3; }
+    50% { opacity: 1; }
+    100% { opacity: 0.3; }
 }
 
-
-/* Sunny mode activated when countdown finishes */
-body.sunny-mode {
-    background: linear-gradient(135deg, #f6d365 0%, #fda085 50%, #f6d365 100%);
-    background-size: 200% 200%;
-    animation: gradientShift 15s ease infinite;
-    color: #333; /* Darker text for light background */
+/* Planets */
+.planet {
+    position: absolute;
+    border-radius: 50%;
+    z-index: -1;
+    animation: rotate 120s infinite linear;
 }
 
-/* Hide stars in sunny mode */
-body.sunny-mode::before, body.sunny-mode::after {
-    display: none;
+@keyframes rotate {
+    from { transform: rotate(0deg) translateX(100px) rotate(0deg); }
+    to { transform: rotate(360deg) translateX(100px) rotate(-360deg); }
 }
 
-
-/* @keyframes gradientShift { ... } */ /* Keep this animation */
-@keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-.container {
-    background-color: rgba(0, 0, 0, 0.6); /* Darker semi-transparent background */
-    padding: 40px 60px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1); /* Lighter shadow on dark bg */
+/* Countdown Container */
+#countdown-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     text-align: center;
-    max-width: 600px;
-    position: relative; /* For positioning hidden elements */
-    animation: fadeIn 1s ease-out;
-    border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
+    z-index: 100;
+    perspective: 1000px;
 }
 
-/* Ensure sunny mode container looks good too */
-body.sunny-mode .container {
-    background-color: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    border: none;
+#countdown {
+    font-size: 6rem;
+    font-weight: bold;
+    text-shadow: 0 0 10px #00f, 0 0 20px #00f, 0 0 30px #00f;
+    animation: pulse 2s infinite alternate;
+    transition: transform 0.5s;
 }
 
+@keyframes pulse {
+    from { text-shadow: 0 0 10px #00f, 0 0 20px #00f, 0 0 30px #00f; }
+    to { text-shadow: 0 0 15px #0ff, 0 0 25px #0ff, 0 0 35px #0ff; }
+}
 
-/* @keyframes fadeIn { ... } */ /* Keep this animation */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-20px); }
+#title {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+}
+
+/* Easter Eggs */
+.easter-egg {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 200;
+    animation: float 3s infinite alternate ease-in-out;
+    opacity: 0.7;
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.easter-egg:hover {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+@keyframes float {
+    from { transform: translateY(0px); }
+    to { transform: translateY(10px); }
+}
+
+/* UFO Easter Egg */
+#ufo {
+    position: absolute;
+    width: 60px;
+    height: 30px;
+    background-color: #c0c0c0;
+    border-radius: 50%;
+    z-index: 200;
+    cursor: pointer;
+    animation: flyby 20s linear infinite;
+    opacity: 0.8;
+    left: -100px;
+    top: 100px;
+}
+
+@keyframes flyby {
+    from { left: -100px; }
+    to { left: calc(100% + 100px); }
+}
+
+/* Hyperspace Effect */
+#hyperspace {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.5s;
+    perspective: 1000px;
+    transform-style: preserve-3d;
+}
+
+.hyperspeed-star {
+    position: absolute;
+    background-color: white;
+    width: 2px;
+    height: 2px;
+    opacity: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Beach Scene */
+#beach-scene {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, #87CEEB, #0077be);
+    display: none;
+    z-index: 300;
+    overflow: hidden;
+}
+
+#sand {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30%;
+    background: linear-gradient(to bottom, #f0e68c, #deb887);
+}
+
+#ocean {
+    position: absolute;
+    bottom: 30%;
+    left: 0;
+    width: 100%;
+    height: 20%;
+    background: linear-gradient(to bottom, #00bfff, #0077be);
+    animation: waves 5s infinite alternate;
+}
+
+@keyframes waves {
+    from { clip-path: polygon(0% 0%, 5% 5%, 10% 0%, 15% 7%, 20% 3%, 25% 5%, 30% 0%, 35% 5%, 40% 0%, 45% 6%, 50% 2%, 55% 5%, 60% 0%, 65% 7%, 70% 3%, 75% 5%, 80% 0%, 85% 6%, 90% 2%, 95% 5%, 100% 0%, 100% 100%, 0% 100%); }
+    to { clip-path: polygon(0% 7%, 5% 3%, 10% 7%, 15% 0%, 20% 5%, 25% 0%, 30% 6%, 35% 2%, 40% 5%, 45% 0%, 50% 7%, 55% 3%, 60% 7%, 65% 0%, 70% 5%, 75% 0%, 80% 6%, 85% 2%, 90% 5%, 95% 0%, 100% 7%, 100% 100%, 0% 100%); }
+}
+
+#sun {
+    position: absolute;
+    top: 10%;
+    right: 10%;
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, #ffff00, #ff8c00);
+    border-radius: 50%;
+    box-shadow: 0 0 50px #ffff00;
+    animation: sunpulse 3s infinite alternate;
+}
+
+@keyframes sunpulse {
+    from { box-shadow: 0 0 50px #ffff00; }
+    to { box-shadow: 0 0 70px #ffff00; }
+}
+
+#felix {
+    position: absolute;
+    bottom: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+}
+
+#felix-image {
+    font-size: 100px;
+    margin-bottom: 20px;
+    animation: relax 3s infinite alternate ease-in-out;
+}
+
+@keyframes relax {
+    from { transform: rotate(-5deg); }
+    to { transform: rotate(5deg); }
+}
+
+#message {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+    text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.7);
+    margin-bottom: 30px;
+    animation: appearing 1s ease-in;
+}
+
+@keyframes appearing {
+    from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-h1 {
-    font-family: 'Lobster', cursive; /* Ensure Lobster font is applied */
-    color: #ff6347; /* Tomato color */
-    font-size: 3.5em;
-    margin-bottom: 10px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.4); /* Slightly stronger shadow */
-    /* Keep wiggle on hover */
-}
-
-.subtitle {
-    font-size: 1.2em;
-    color: #ccc; /* Lighter subtitle color */
-    margin-bottom: 30px;
-    animation: slideInFromLeft 1.2s ease-out;
-}
-
-body.sunny-mode .subtitle {
-    color: #555; /* Restore original color in sunny mode */
-}
-
-/* @keyframes slideInFromLeft { ... } */ /* Keep this animation */
-@keyframes slideInFromLeft {
-    from { opacity: 0; transform: translateX(-50px); }
-    to { opacity: 1; transform: translateX(0); }
-}
-
-#timer-container { /* Style the new container if needed, maybe just for layout */
-    margin-bottom: 20px;
-    animation: slideInFromRight 1.2s ease-out;
-}
-
-#timer {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    /* animation removed from here, moved to container */
-}
-
-/* @keyframes slideInFromRight { ... } */ /* Keep this animation */
-@keyframes slideInFromRight {
-    from { opacity: 0; transform: translateX(50px); }
-    to { opacity: 1; transform: translateX(0); }
-}
-
-#timer div {
-    background-color: rgba(255, 99, 71, 0.8); /* Slightly transparent Tomato */
-    color: white;
-    padding: 15px 20px;
-    border-radius: 8px;
-    min-width: 80px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Adjusted shadow */
-    transition: transform 0.2s ease, background-color 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.3); /* Subtle border */
-}
-
-body.sunny-mode #timer div {
-    background-color: #ff6347; /* Solid color in sunny mode */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    border: none;
-}
-
-
-#timer div:hover {
-    transform: translateY(-5px); /* Lift effect on hover */
-    background-color: rgba(255, 99, 71, 1); /* Solid on hover */
-}
-
-body.sunny-mode #timer div:hover {
-     background-color: #e5533d; /* Darker shade on hover in sunny mode */
-}
-
-
-#timer span {
-    display: block;
-    font-size: 2.5em;
-    font-weight: bold;
-    /* Add a subtle pop effect when numbers change? (Handled in JS potentially or harder with CSS) */
-}
-
-.until {
-    font-size: 0.9em;
-    color: #aaa; /* Lighter color */
-    margin-bottom: 40px;
-    animation: fadeIn 1.5s ease-out 0.5s; /* Fade in slightly later */
-    animation-fill-mode: backwards; /* Start invisible before animation */
-}
-
-body.sunny-mode .until {
-    color: #777; /* Restore original color */
-}
-
-
-/* Hidden Button / Easter Egg Trigger */
-.escape-hatch {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    width: 15px;
-    height: 15px;
-    background-color: rgba(255, 99, 71, 0.5); /* Semi-transparent */
-    border-radius: 50%;
-    cursor: pointer;
-    transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-}
-
-.escape-hatch:hover {
-    transform: scale(1.5);
-    background-color: #ff6347; /* Solid on hover */
-}
-
-/* Retirement Visualization */
-#retirement-visual {
-    margin-top: 30px;
-    padding: 20px;
-    background-color: rgba(0, 121, 107, 0.7); /* Darker Teal, semi-transparent */
-    border-radius: 10px;
-    border: 2px dashed rgba(128, 222, 234, 0.7); /* Cyan border, semi-transparent */
-    animation: popIn 0.5s ease-out;
-}
-
-body.sunny-mode #retirement-visual {
-    background-color: #e0f7fa; /* Light cyan */
-    border: 2px dashed #80deea; /* Cyan border */
-}
-
-
-/* @keyframes popIn { ... } */ /* Keep this animation */
-@keyframes popIn {
-    from { opacity: 0; transform: scale(0.8); }
-    to { opacity: 1; transform: scale(1); }
-}
-
-#retirement-visual h2 {
-    color: #b2dfdb; /* Lighter Teal */
-    font-family: 'Lobster', cursive;
-    font-size: 2em;
-}
-
-body.sunny-mode #retirement-visual h2 {
-     color: #00796b; /* Original Teal */
-}
-
-#retirement-gif {
-    max-width: 80%;
-    height: auto;
-    border-radius: 5px;
-    margin-top: 15px;
-    margin-bottom: 20px;
-}
-
-#back-to-reality {
+#back-button {
     padding: 10px 20px;
-    font-size: 1em;
-    font-weight: bold;
+    font-size: 1.2rem;
+    background-color: #ff8c00;
     color: white;
-    background-color: #ff6347;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s ease;
+    transition: transform 0.3s, background-color 0.3s;
+    animation: bounce 2s infinite alternate;
 }
 
-#back-to-reality:hover {
-    background-color: #e5533d;
-    transform: scale(1.05);
+#back-button:hover {
+    background-color: #ff4500;
+    transform: scale(1.1);
 }
 
-/* Simple Footer Easter Egg */
-.footer-egg {
+@keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-10px); }
+}
+
+/* Palm trees */
+.palm {
     position: absolute;
-    bottom: 5px;
+    bottom: 30%;
+    z-index: 1;
+}
+
+.palm-trunk {
+    width: 20px;
+    height: 120px;
+    background: linear-gradient(to right, #8b4513, #a0522d, #8b4513);
+    border-radius: 5px;
+    transform: rotate(5deg); /* Slight tilt */
+}
+
+.palm-leaf {
+    position: absolute;
+    top: -10px; /* Position leaves above the trunk */
+    left: 50%; /* Center leaves horizontally */
+    transform-origin: bottom center; /* Rotate from the base */
+    width: 100px;
+    height: 30px;
+    background-color: #32cd32;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    animation: leafsway 4s infinite alternate ease-in-out;
+}
+
+/* Adjust individual leaf rotations in HTML or via JS */
+
+@keyframes leafsway {
+    from { transform: rotate(-10deg); }
+    to { transform: rotate(10deg); }
+}
+
+/* Clouds */
+.cloud {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    animation: drift 30s linear infinite;
+}
+
+/* Add pseudo-elements for cloud shape */
+.cloud::before, .cloud::after {
+    content: '';
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+}
+
+.cloud::before {
+    width: 60%;
+    height: 60%;
+    top: -30%;
+    left: 10%;
+}
+
+.cloud::after {
+    width: 80%;
+    height: 80%;
+    top: -15%;
+    right: 5%;
+}
+
+@keyframes drift {
+    from { transform: translateX(-200px); }
+    to { transform: translateX(calc(100vw + 200px)); }
+}
+
+/* Cocktail */
+#cocktail {
+    position: absolute;
+    bottom: 50px;
+    right: 50px;
+    z-index: 5;
+    transform: rotate(15deg);
+    animation: sip 10s infinite alternate;
+}
+
+@keyframes sip {
+    0%, 90% { transform: rotate(15deg); }
+    95% { transform: rotate(45deg); }
+    100% { transform: rotate(15deg); }
+}
+
+.glass {
+    width: 40px;
+    height: 60px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 0 0 20px 20px;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.7);
+}
+
+.liquid {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 70%;
+    background: linear-gradient(to bottom, #ff8c00, #ff4500);
+}
+
+.straw {
+    position: absolute;
+    top: -20px;
+    right: 10px;
+    width: 5px;
+    height: 80px;
+    background-color: #ff0000;
+    transform: rotate(-20deg);
+    border-radius: 3px;
+}
+
+.umbrella {
+    position: absolute;
+    top: -15px;
     left: 5px;
-    font-size: 0.8em;
-    color: #777; /* Darker grey for contrast */
-    cursor: help;
-    transition: transform 0.3s ease, color 0.3s ease;
+    width: 30px;
+    height: 15px;
+    background-color: #ff69b4;
+    border-radius: 15px 15px 0 0;
+    /* Add stick */
+}
+.umbrella::before {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 15px;
+    background-color: #d2691e;
 }
 
-body.sunny-mode .footer-egg {
-    color: #aaa; /* Lighter grey in sunny mode */
+/* Responsive styles */
+@media (max-width: 768px) {
+    #countdown {
+        font-size: 3rem;
+    }
+    #title {
+        font-size: 1.5rem;
+    }
+    #message {
+        font-size: 1.8rem;
+    }
+    #felix-image {
+        font-size: 80px;
+    }
+    .palm-trunk {
+        height: 80px;
+        width: 15px;
+    }
+    .palm-leaf {
+        width: 70px;
+        height: 20px;
+    }
+    #cocktail {
+        bottom: 20px;
+        right: 20px;
+    }
+    .glass {
+        width: 30px;
+        height: 50px;
+    }
+    .straw {
+        height: 60px;
+    }
 }
 
-
-.footer-egg:hover {
-    transform: rotate(360deg) scale(1.5);
-    color: #ff6347;
-}
-
-
-/* Utility Class */
-.hidden {
-    display: none;
-}
-
-/* Basic Animation Easter Egg Example */
-@keyframes wiggle {
-    0%, 100% { transform: rotate(-3deg); }
-    50% { transform: rotate(3deg); }
-}
-
-h1:hover {
-    animation: wiggle 0.5s ease-in-out infinite;
+@media (max-width: 480px) {
+    #countdown {
+        font-size: 2rem;
+    }
+    #title {
+        font-size: 1.2rem;
+    }
+    #message {
+        font-size: 1.5rem;
+    }
+    #back-button {
+        font-size: 1rem;
+        padding: 8px 15px;
+    }
 }
